@@ -1,0 +1,61 @@
+/* Styles specific to the blocked page */
+
+body {
+  min-height: 100vh;
+  background-color: var(--background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.blocked-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+.blocked-content {
+  background-color: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--space-5);
+}
+
+.logo {
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--space-3);
+}
+
+.blocked-message {
+  margin-bottom: var(--space-6);
+}
+
+.timer-info {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  background-color: var(--primary-dark);
+  color: white;
+  border-radius: var(--radius-md);
+}
+
+.countdown {
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-top: var(--space-2);
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-4);
+}

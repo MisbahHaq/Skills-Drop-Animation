@@ -1,0 +1,47 @@
+{
+  "name": "FocusFlow",
+  "description": "Boost productivity with website blocking and ad filtering",
+  "version": "1.0",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "storage",
+    "declarativeNetRequest",
+    "alarms",
+    "tabs",
+    "webNavigation"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "service-worker.js",
+    "type": "module"
+  },
+  "web_accessible_resources": [{
+    "resources": ["blocked.html", "css/*", "js/*"],
+    "matches": ["<all_urls>"]
+  }],
+  "options_page": "settings.html",
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ruleset_1",
+        "enabled": true,
+        "path": "rules/rules_1.json"
+      }
+    ]
+  }
+}

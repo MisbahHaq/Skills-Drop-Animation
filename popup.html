@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FocusFlow</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/popup.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="popup-container">
+    <header class="header">
+      <div class="logo-container">
+        <div class="logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <h1>FocusFlow</h1>
+      </div>
+      <div id="status-indicator" class="status-indicator">Inactive</div>
+    </header>
+
+    <div class="timer-container">
+      <div class="timer-display">
+        <div id="timer">00:00</div>
+        <div id="timer-status">Not running</div>
+      </div>
+      <div class="timer-controls">
+        <button id="start-25" class="button primary">25 min</button>
+        <button id="start-50" class="button secondary">50 min</button>
+        <button id="stop-timer" class="button danger" disabled>Stop</button>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <h2>Quick Actions</h2>
+      <div class="action-buttons">
+        <button id="block-current" class="button action">
+          <span class="icon">+</span>
+          Block Current Site
+        </button>
+        <button id="toggle-blocking" class="button action">
+          <span class="icon">✓</span>
+          <span id="toggle-text">Enable Blocking</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="blocked-sites">
+      <h2>Recently Blocked Sites</h2>
+      <ul id="recent-sites" class="site-list">
+        <!-- List items will be populated dynamically -->
+        <li class="empty-message">No recently blocked sites</li>
+      </ul>
+    </div>
+
+    <footer class="footer">
+      <button id="open-settings" class="button text">
+        <span class="icon">⚙️</span>
+        Settings
+      </button>
+      <span id="ad-blocking-status" class="status-text">Ad blocking: On</span>
+    </footer>
+  </div>
+  
+  <script type="module" src="js/popup.js"></script>
+</body>
+</html>

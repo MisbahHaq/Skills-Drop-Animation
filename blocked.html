@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Site Blocked - FocusFlow</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/blocked.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="blocked-container">
+    <div class="blocked-content">
+      <div class="logo-container">
+        <div class="logo">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <h1>FocusFlow</h1>
+      </div>
+      
+      <div class="blocked-message">
+        <h2>This site is currently blocked</h2>
+        <p>This website has been blocked to help you stay focused.</p>
+        
+        <div id="timer-info" class="timer-info hidden">
+          <p>Focus session in progress:</p>
+          <div id="countdown" class="countdown">00:00</div>
+        </div>
+      </div>
+      
+      <div class="actions">
+        <button id="go-back" class="button secondary">Go Back</button>
+        <button id="temp-access" class="button primary">Request Access</button>
+      </div>
+    </div>
+  </div>
+  
+  <div id="password-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Password Required</h3>
+        <button id="close-modal" class="close-button">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Enter your password to access this site temporarily.</p>
+        <div class="form-group">
+          <label for="override-password">Password</label>
+          <input type="password" id="override-password" class="input">
+        </div>
+        <div class="form-group">
+          <label for="override-duration">Access Duration</label>
+          <select id="override-duration" class="select">
+            <option value="5">5 minutes</option>
+            <option value="15">15 minutes</option>
+            <option value="30">30 minutes</option>
+            <option value="60">1 hour</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button id="submit-password" class="button primary">Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module" src="js/blocked.js"></script>
+</body>
+</html>
