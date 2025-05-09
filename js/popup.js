@@ -184,6 +184,13 @@ async function blockCurrentSite() {
     
     if (currentTab && currentTab.url) {
       const url = new URL(currentTab.url);
+      
+      // Skip chrome:// URLs and extension pages
+      if (url.protocol === 'chrome:' || url.protocol === 'chrome-extension:') {
+        alert('Cannot block browser or extension pages.');
+        return;
+      }
+      
       const hostname = url.hostname;
       
       // Add this site to blocked sites
@@ -194,11 +201,21 @@ async function blockCurrentSite() {
         isCurrentlyBlocked: true
       });
       
+      // Enable blocking if it's not already enabled
+      const { blockingEnabled } = await chrome.storage.sync.get('blockingEnabled');
+      if (!blockingEnabled) {
+        await chrome.storage.sync.set({ blockingEnabled: true });
+        updateBlockingStatus();
+      }
+      
       // Refresh the blocked sites list
       await loadRecentSites();
       
-      // Update UI
-      alert(`${hostname} has been added to blocked sites.`);
+      // Update UI and notify user
+      alert(`${hostname} has been blocked. The page will refresh to apply blocking.`);
+      
+      // Refresh the current tab to apply blocking
+      chrome.tabs.reload(currentTab.id);
     }
   } catch (error) {
     console.error('Error blocking site:', error);
@@ -244,7 +261,7 @@ async function loadRecentSites() {
     siteUrl.textContent = site.url;
     
     const toggleButton = document.createElement('button');
-    toggleButton.className = 'toggle-site';
+    toggleButton.className = 'button small ' + (site.isCurrentlyBlocked ? 'danger' : 'primary');
     toggleButton.textContent = site.isCurrentlyBlocked ? 'Unblock' : 'Block';
     toggleButton.dataset.siteId = site.id;
     toggleButton.addEventListener('click', toggleSiteBlock);
@@ -262,8 +279,26 @@ async function toggleSiteBlock(event) {
   const siteId = event.target.dataset.siteId;
   if (!siteId) return;
   
-  await toggleSiteBlocking(siteId);
-  await loadRecentSites();
+  try {
+    await toggleSiteBlocking(siteId);
+    await loadRecentSites();
+    
+    // Refresh all tabs with this site to apply changes
+    const sites = await getBlockedSites();
+    const site = sites.find(s => s.id === siteId);
+    
+    if (site) {
+      const tabs = await chrome.tabs.query({});
+      tabs.forEach(tab => {
+        if (tab.url && tab.url.includes(site.url)) {
+          chrome.tabs.reload(tab.id);
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error toggling site:', error);
+    alert('Failed to update site status. Please try again.');
+  }
 }
 
 // Open settings page

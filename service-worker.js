@@ -22,7 +22,8 @@ chrome.runtime.onInstalled.addListener(() => {
         passwordProtection: {
           enabled: false,
           password: ''
-        }
+        },
+        blockingEnabled: true
       });
     }
   });
@@ -42,7 +43,13 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 // Enforce scheduled blocking
 async function enforceScheduledBlocking() {
-  const { blockedSites, schedules } = await chrome.storage.sync.get(['blockedSites', 'schedules']);
+  const { blockedSites, schedules, blockingEnabled } = await chrome.storage.sync.get(['blockedSites', 'schedules', 'blockingEnabled']);
+  
+  // If blocking is disabled, don't enforce schedules
+  if (!blockingEnabled) {
+    return;
+  }
+  
   const currentSession = await getCurrentSession();
   
   // If there's an active Pomodoro session, don't check schedules
@@ -70,7 +77,7 @@ async function enforceScheduledBlocking() {
     };
   });
   
-  chrome.storage.sync.set({ blockedSites: updatedBlockedSites });
+  await chrome.storage.sync.set({ blockedSites: updatedBlockedSites });
 }
 
 // Start a Pomodoro focus session
@@ -157,25 +164,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// Handle navigation events for more reliable blocking
-chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
-  // Only handle main frame navigation
-  if (details.frameId !== 0) return;
-
-  const url = details.url;
-  if (!url || url === 'chrome://newtab/' || url.startsWith('chrome://') || url.includes('blocked.html')) {
-    return;
-  }
-
+// Check if a URL should be blocked
+async function shouldBlockUrl(url) {
   try {
-    const { blockedSites } = await chrome.storage.sync.get(['blockedSites']);
+    const { blockingEnabled, blockedSites } = await chrome.storage.sync.get(['blockingEnabled', 'blockedSites']);
     
-    // Get the hostname from the URL
+    // If blocking is disabled, don't block anything
+    if (!blockingEnabled) {
+      return false;
+    }
+    
     const urlToCheck = new URL(url).hostname;
     
     // Check if URL should be blocked
-    const isBlocked = blockedSites.some(site => {
-      if (!site.isCurrentlyBlocked) return false;
+    return blockedSites.some(site => {
+      if (!site.isCurrentlyBlocked) {
+        return false;
+      }
       
       if (site.pattern) {
         try {
@@ -189,8 +194,26 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
       
       return site.url === urlToCheck;
     });
+  } catch (error) {
+    console.error('Error checking URL:', error);
+    return false;
+  }
+}
+
+// Handle navigation events for more reliable blocking
+chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
+  // Only handle main frame navigation
+  if (details.frameId !== 0) return;
+  
+  const url = details.url;
+  if (!url || url === 'chrome://newtab/' || url.startsWith('chrome://') || url.includes('blocked.html')) {
+    return;
+  }
+  
+  try {
+    const shouldBlock = await shouldBlockUrl(url);
     
-    if (isBlocked) {
+    if (shouldBlock) {
       // Get the extension's blocked.html URL
       const blockedUrl = chrome.runtime.getURL('blocked.html');
       
@@ -210,40 +233,17 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     if (!url || url === 'chrome://newtab/' || url.startsWith('chrome://') || url.includes('blocked.html')) {
       return;
     }
-
+    
     try {
-      const { blockedSites } = await chrome.storage.sync.get(['blockedSites']);
+      const shouldBlock = await shouldBlockUrl(url);
       
-      // Get the hostname from the URL
-      const urlToCheck = new URL(url).hostname;
-      
-      // Check if current URL should be blocked
-      const isBlocked = blockedSites.some(site => {
-        // Skip sites that aren't currently blocked
-        if (!site.isCurrentlyBlocked) return false;
-        
-        // Handle pattern matching
-        if (site.pattern) {
-          try {
-            const regex = new RegExp(site.pattern);
-            return regex.test(urlToCheck);
-          } catch (e) {
-            console.error('Invalid regex pattern:', site.pattern);
-            return false;
-          }
-        }
-        
-        // Handle exact matching
-        return site.url === urlToCheck;
-      });
-      
-      if (isBlocked) {
+      if (shouldBlock) {
         // Get the extension's blocked.html URL
         const blockedUrl = chrome.runtime.getURL('blocked.html');
         
         // Only redirect if we're not already on the blocked page
         if (!tab.url.includes(blockedUrl)) {
-          console.log('Blocking access to:', urlToCheck);
+          console.log('Blocking access to:', url);
           chrome.tabs.update(tabId, { url: blockedUrl });
         }
       }
